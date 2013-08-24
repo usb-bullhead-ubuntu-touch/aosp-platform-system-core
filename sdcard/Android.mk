@@ -1,11 +1,16 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-
 LOCAL_SRC_FILES := sdcard.c
+LOCAL_MODULE := libsdcard
+LOCAL_CFLAGS := -Wall -Wno-unused-parameter
+LOCAL_MODULE_TAGS := optional
+include $(BUILD_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_SRC_FILES := main.c
 LOCAL_MODULE := sdcard
 LOCAL_CFLAGS := -Wall -Wno-unused-parameter -Werror
-
-LOCAL_SHARED_LIBRARIES := libcutils
-
+LOCAL_STATIC_LIBRARIES := libsdcard libc libcutils liblog
+LOCAL_FORCE_STATIC_EXECUTABLE := true
 include $(BUILD_EXECUTABLE)
