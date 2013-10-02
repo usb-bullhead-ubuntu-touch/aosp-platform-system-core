@@ -243,6 +243,9 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     #setprop vold.post_fs_data_done 1
 
+on early-boot
+    start upstart-watcher
+
 on boot
 # basic network init
     ifup lo
@@ -390,6 +393,10 @@ service ueventd /sbin/ueventd
     class core
     critical
     seclabel u:r:ueventd:s0
+
+
+service upstart-watcher /sbin/upstart-property-watcher
+    class core
 
 on property:selinux.reload_policy=1
     restart ueventd
