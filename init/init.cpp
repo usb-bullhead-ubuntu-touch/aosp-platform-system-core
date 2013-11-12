@@ -725,10 +725,12 @@ static int keychord_init_action(int nargs, char **args)
 
 static int console_init_action(int nargs, char **args)
 {
-    char console[PROP_VALUE_MAX];
-    if (property_get("ro.boot.console", console) > 0) {
-        snprintf(console_name, sizeof(console_name), "/dev/%s", console);
-    }
+    /* XXX: Ubuntu specific, we don't want the Android
+     * container to  use the real console device */
+    // char console[PROP_VALUE_MAX];
+    // if (property_get("ro.boot.console", console) > 0) {
+    //    snprintf(console_name, sizeof(console_name), "/dev/%s", console);
+    // }
 
     int fd = open(console_name, O_RDWR | O_CLOEXEC);
     if (fd >= 0)
