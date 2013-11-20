@@ -991,6 +991,7 @@ static void selinux_initialize(bool in_kernel_domain) {
 }
 
 int main(int argc, char** argv) {
+    struct stat s;
     if (!strcmp(basename(argv[0]), "ueventd")) {
         return ueventd_main(argc, argv);
     }
@@ -1009,10 +1010,13 @@ int main(int argc, char** argv) {
     // Get the basic filesystem setup we need put together in the initramdisk
     // on / and then we'll let the rc file figure out the rest.
     if (is_first_stage) {
-        mount("tmpfs", "/dev", "tmpfs", MS_NOSUID, "mode=0755");
-        mkdir("/dev/pts", 0755);
         mkdir("/dev/socket", 0755);
-        mount("devpts", "/dev/pts", "devpts", 0, NULL);
+        if (stat("/sbin/recovery", &s) == 0) {
+            /* Only create and mount everything if we're in recovery mode */
+            mount("tmpfs", "/dev", "tmpfs", MS_NOSUID, "mode=0755");
+            mkdir("/dev/pts", 0755);
+            mount("devpts", "/dev/pts", "devpts", 0, NULL);
+        }
         mount("proc", "/proc", "proc", 0, NULL);
         mount("sysfs", "/sys", "sysfs", 0, NULL);
     }
