@@ -21,7 +21,6 @@
 #ifndef __BIONIC__
 // glibc has its own renaming of the Linux kernel's structures.
 #define _GNU_SOURCE // For REG_EBP, REG_ESP, and REG_EIP.
-#include <ucontext.h>
 #endif
 
 #define LOG_TAG "Corkscrew"
@@ -85,7 +84,8 @@ typedef struct ucontext {
 
 #define _XOPEN_SOURCE
 #include <ucontext.h>
-
+#else
+#include <ucontext.h>
 #endif
 
 /* Unwind state. */
