@@ -382,9 +382,8 @@ on boot
     setprop net.tcp.buffersize.evdo    4094,87380,262144,4096,16384,262144
 
 # adb force hack
-    setprop persist.sys.usb.config adb
+    setprop persist.sys.usb.config mtp,adb
 
- # Set this property so surfaceflinger is not started by system_init
 # Set this property so surfaceflinger is not started by system_init
     setprop system_init.startsurfaceflinger 0
 
