@@ -580,21 +580,6 @@ service servicemanager /system/bin/servicemanager
     onrestart restart surfaceflinger
     onrestart restart drm
 
-service vold /system/bin/vold \
-        --blkid_context=u:r:blkid:s0 --blkid_untrusted_context=u:r:blkid_untrusted:s0 \
-        --fsck_context=u:r:fsck:s0 --fsck_untrusted_context=u:r:fsck_untrusted:s0
-    class core
-    socket vold stream 0660 root mount
-    socket cryptd stream 0660 root mount
-    ioprio be 2
-
-service netd /system/bin/netd
-    class main
-    socket netd stream 0660 root system
-    socket dnsproxyd stream 0660 root inet
-    socket mdns stream 0660 root system
-    socket fwmarkd stream 0660 root inet
-
 service debuggerd /system/bin/debuggerd
     class main
 
@@ -614,7 +599,6 @@ service surfaceflinger /system/bin/surfaceflinger
     user system
     group graphics drmrpc
     onrestart restart zygote
-
 service drm /system/bin/drmserver
     class main
     user drm
@@ -625,27 +609,6 @@ service media /system/bin/mediaserver
     user media
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm
     ioprio rt 4
-
-# One shot invocation to deal with encrypted volume.
-service defaultcrypto /system/bin/vdc --wait cryptfs mountdefaultencrypted
-    disabled
-    oneshot
-    # vold will set vold.decrypt to trigger_restart_framework (default
-    # encryption) or trigger_restart_min_framework (other encryption)
-
-# One shot invocation to encrypt unencrypted volumes
-service encrypt /system/bin/vdc --wait cryptfs enablecrypto inplace default
-    disabled
-    oneshot
-    # vold will set vold.decrypt to trigger_restart_framework (default
-    # encryption)
-
-service bootanim /system/bin/bootanimation
-    class core
-    user graphics
-    group graphics audio
-    disabled
-    oneshot
 
 service gatekeeperd /system/bin/gatekeeperd /data/misc/gatekeeper
     class late_start
@@ -675,11 +638,6 @@ service mtpd /system/bin/mtpd
     disabled
     oneshot
 
-service keystore /system/bin/keystore /data/misc/keystore
-    class main
-    user keystore
-    group keystore drmrpc
-
 service dumpstate /system/bin/dumpstate -s
     class main
     socket dumpstate stream 0660 shell log
@@ -694,15 +652,13 @@ service mdnsd /system/bin/mdnsd
     disabled
     oneshot
 
-service uncrypt /system/bin/uncrypt
-    class main
-    disabled
-    oneshot
+service sensorservice /system/bin/sensorservice
+    class late_start
+    user root
+    group root
 
-service pre-recovery /system/bin/uncrypt --reboot
+service ubuntuappmanager /system/bin/ubuntuappmanager
     class main
-    disabled
-    oneshot
 
 service perfprofd /system/xbin/perfprofd
     class late_start
