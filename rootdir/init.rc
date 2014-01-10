@@ -533,8 +533,8 @@ service mdnsd /system/bin/mdnsd
 
 service sensorservice /system/bin/sensorservice
     class late_start
-    user system
-    group graphics audio camera inet net_bt net_bt_admin net_bw_acct drmrpc input
+    user root
+    group root
 
 service ubuntuappmanager /system/bin/ubuntuappmanager
     class main
