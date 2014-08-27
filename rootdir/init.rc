@@ -136,6 +136,10 @@ loglevel 3
 # checker programs.
     mkdir /dev/fscklogs 0770 root system
 
+# Create directory used by the camera-service to store its trust-store socket
+    mkdir /dev/socket/camera_service 0770 media media
+    chmod 2770 /dev/socket/camera_service
+
 on post-fs
     # once everything is setup, no need to modify /
     mount rootfs rootfs / ro remount
