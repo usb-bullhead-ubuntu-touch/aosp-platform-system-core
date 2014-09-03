@@ -388,9 +388,6 @@ on boot
     class_start core
     class_start main
 
-# adb force hack
-    setprop persist.sys.usb.config mtp,adb
-
 on nonencrypted
     class_start late_start
 
