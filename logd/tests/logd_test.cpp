@@ -306,10 +306,10 @@ TEST(logd, both) {
     bool kernel_logger_content = false;
 
     static const char *loggers[] = {
-        "/dev/log/main",   "/dev/log_main",
-        "/dev/log/radio",  "/dev/log_radio",
-        "/dev/log/events", "/dev/log_events",
-        "/dev/log/system", "/dev/log_system",
+        "/dev/alog/main",   "/dev/log_main",
+        "/dev/alog/radio",  "/dev/log_radio",
+        "/dev/alog/events", "/dev/log_events",
+        "/dev/alog/system", "/dev/log_system",
     };
 
     for (unsigned int i = 0; i < (sizeof(loggers) / sizeof(loggers[0])); ++i) {
