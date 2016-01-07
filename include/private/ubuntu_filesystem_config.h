@@ -219,6 +219,7 @@ static const struct ubuntu_fs_path_config ubuntu_files[] = {
     { 04755, UBUNTU_ID_ROOT,      UBUNTU_ID_ROOT,      0, "usr/bin/sudo" },
     { 04755, UBUNTU_ID_ROOT,      UBUNTU_ID_ROOT,      0, "usr/bin/tcptraceroute.mt" },
     { 02755, UBUNTU_ID_ROOT,      U_TTY_GID,           0, "usr/bin/wall" },
+    { 02755, UBUNTU_ID_ROOT,      U_TTY_GID,           0, "usr/bin/*" },
     { 04755, UBUNTU_ID_ROOT,      UBUNTU_ID_ROOT,      0, "usr/lib/arm-linux-gnueabihf/lxc/lxc-user-nic" },
     { 04755, UBUNTU_ID_ROOT,      UBUNTU_ID_ROOT,      0, "usr/lib/arm-linux-gnueabihf/oxide-qt/chrome-sandbox" },
     { 04754, UBUNTU_ID_ROOT,      U_MESSAGEBUS_G,      0, "usr/lib/dbus-1.0/dbus-daemon-launch-helper" },
@@ -449,6 +450,7 @@ static inline void ubuntu_fs_config(const char *path, int dir,
     cfr = (dir && ubuntu_dirs_c || ubuntu_files_c);
     if ( 0 == pc->prefix ) {
         if (cfr) {
+            cfr = 0;
             // check if we have rule in default set
             if (dir) {
                 pc = ubuntu_dirs;
@@ -474,7 +476,7 @@ static inline void ubuntu_fs_config(const char *path, int dir,
         *mode = pc->mode;
     } else {
         if (pc->mode & 07000) {
-            *mode = (*mode & (~07777)) | pc->mode;
+            *mode = (*mode & (~07000)) | pc->mode;
         }
     }
     *capabilities = pc->capabilities;
