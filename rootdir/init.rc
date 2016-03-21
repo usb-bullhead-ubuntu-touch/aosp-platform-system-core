@@ -279,7 +279,8 @@ on post-fs-data
 
     # create basic filesystem structure
     mkdir /data/misc 01771 system misc
-    mkdir /data/misc/adb 02750 system shell
+    # allow phablet user( uid 32011) to store adbd kyes
+    mkdir /data/misc/adb 02750 32011 32011
     mkdir /data/misc/bluedroid 02770 bluetooth net_bt_stack
     # Fix the access permissions and group ownership for 'bt_config.conf'
     chmod 0660 /data/misc/bluedroid/bt_config.conf
