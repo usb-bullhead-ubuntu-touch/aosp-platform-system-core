@@ -352,7 +352,7 @@ static void handle_property_set_fd()
         msg.name[PROP_NAME_MAX-1] = 0;
         msg.value[0] = 0;
 
-        if (msg.name) {
+        if (msg.name[0] != 0) {
             /* If we have a value, copy it over, otherwise returns the default */
             ret = property_get(msg.name, rproperty);
             if (ret) {
