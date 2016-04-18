@@ -36,6 +36,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libkeystore_binder
 LOCAL_STATIC_LIBRARIES := libscrypt_static
 LOCAL_C_INCLUDES := external/scrypt/lib/crypto
-include $(BUILD_EXECUTABLE)
+# include $(BUILD_EXECUTABLE)
 
 include $(call first-makefiles-under,$(LOCAL_PATH))
