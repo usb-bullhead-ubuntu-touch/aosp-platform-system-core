@@ -431,7 +431,7 @@ static inline const struct fs_path_config* findConfig(const char *path, const st
     return pc;
 }
 
-static inline void ubuntu_fs_config(const char *path, int dir,
+static inline void ubuntu_fs_config(const char *path, int dir, const char *target_out_directory,
                              unsigned *uid, unsigned *gid, unsigned *mode, uint64_t *capabilities)
 {
     const struct fs_path_config *pc;
