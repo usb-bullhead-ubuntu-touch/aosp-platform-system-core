@@ -65,6 +65,13 @@ struct fstab_rec {
     int partnum;
     int swap_prio;
     unsigned int zram_size;
+
+    // cwm
+    char *blk_device2;
+    char *fs_type2;
+    char *fs_options2;
+
+    char *lun;
 };
 
 // Callback function for verity status

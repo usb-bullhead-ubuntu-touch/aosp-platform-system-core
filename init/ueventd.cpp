@@ -25,6 +25,7 @@
 #include <base/stringprintf.h>
 #include <private/android_filesystem_config.h>
 #include <selinux/selinux.h>
+#include <sys/socket.h>
 
 #include "ueventd.h"
 #include "log.h"
@@ -76,6 +77,14 @@ int ueventd_main(int argc, char **argv)
         int nr = poll(&ufd, 1, -1);
         if (nr <= 0) {
             continue;
+        }
+        if (ufd.revents & POLLERR) {
+            int error = 0;
+            socklen_t errlen = sizeof(error);
+
+            getsockopt(ufd.fd, SOL_SOCKET, SO_ERROR, (void *) &error, &errlen);
+            ERROR("got POLLERR, terminating ueventd: SO_ERROR is %d\n", error);
+            exit(1);
         }
         if (ufd.revents & POLLIN) {
             handle_device_fd();

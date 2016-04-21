@@ -165,6 +165,10 @@ on init
     # checker programs.
     mkdir /dev/fscklogs 0770 root system
 
+    # Create directory used by the camera-service to store its trust-store socket
+    mkdir /dev/socket/camera_service 0770 media media
+    chmod 2770 /dev/socket/camera_service
+
     # pstore/ramoops previous console log
     mount pstore pstore /sys/fs/pstore
     chown system log /sys/fs/pstore/console-ramoops
@@ -275,7 +279,8 @@ on post-fs-data
 
     # create basic filesystem structure
     mkdir /data/misc 01771 system misc
-    mkdir /data/misc/adb 02750 system shell
+    # allow phablet user( uid 32011) to store adbd kyes
+    mkdir /data/misc/adb 02750 32011 3201
     mkdir /data/misc/bluedroid 02770 bluetooth net_bt_stack
     # Fix the access permissions and group ownership for 'bt_config.conf'
     chmod 0660 /data/misc/bluedroid/bt_config.conf
@@ -367,6 +372,9 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     #setprop vold.post_fs_data_done 1
 
+on early-boot
+    start upstart-watcher
+
 on boot
     # basic network init
     ifup lo
@@ -434,16 +442,27 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
 
     chown system system /sys/class/timed_output/vibrator/enable
-    chown system system /sys/class/leds/keyboard-backlight/brightness
-    chown system system /sys/class/leds/lcd-backlight/brightness
-    chown system system /sys/class/leds/button-backlight/brightness
-    chown system system /sys/class/leds/jogball-backlight/brightness
-    chown system system /sys/class/leds/red/brightness
-    chown system system /sys/class/leds/green/brightness
-    chown system system /sys/class/leds/blue/brightness
-    chown system system /sys/class/leds/red/device/grpfreq
-    chown system system /sys/class/leds/red/device/grppwm
-    chown system system /sys/class/leds/red/device/blink
+    chmod 0666 /sys/class/leds/lcd-backlight/brightness
+    chown system input /sys/class/leds/keyboard-backlight/brightness
+    chmod 0664 /sys/class/leds/keyboard-backlight/brightness
+    chown system input /sys/class/leds/lcd-backlight/brightness
+    chmod 0664 /sys/class/leds/lcd-backlight/brightness
+    chown system input /sys/class/leds/button-backlight/brightness
+    chmod 0664 /sys/class/leds/button-backlight/brightness
+    chown system input /sys/class/leds/jogball-backlight/brightness
+    chmod 0664 /sys/class/leds/jogball-backlight/brightness
+    chown system input /sys/class/leds/red/brightness
+    chmod 0664 /sys/class/leds/red/brightness
+    chown system input /sys/class/leds/green/brightness
+    chmod 0664 /sys/class/leds/green/brightness
+    chown system input /sys/class/leds/blue/brightness
+    chmod 0664 /sys/class/leds/blue/brightness
+    chown system input /sys/class/leds/red/device/grpfreq
+    chmod 0664 /sys/class/leds/red/device/grpfreq
+    chown system input /sys/class/leds/red/device/grppwm
+    chmod 0664 /sys/class/leds/red/device/grppwm
+    chown system input /sys/class/leds/red/device/blink
+    chmod 0664 /sys/class/leds/red/device/blink
     chown system system /sys/class/timed_output/vibrator/enable
     chown system system /sys/module/sco/parameters/disable_esco
     chown system system /sys/kernel/ipv4/tcp_wmem_min
@@ -452,6 +471,9 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_min
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
+    # Temporarily allowing any user to use the vibrator driver
+    ## Until we have a common way to access it via platform-api
+    chmod 0666 /sys/class/timed_output/vibrator/enable
     chown root radio /proc/cmdline
 
     # Define default initial receive window size in segments.
@@ -536,11 +558,14 @@ service healthd /sbin/healthd
     seclabel u:r:healthd:s0
     group root system
 
+service upstart-watcher /sbin/upstart-property-watcher
+    class core
+
 service console /system/bin/sh
     class core
     console
     disabled
-    user shell
+    user root
     group shell log
     seclabel u:r:shell:s0
 
@@ -574,21 +599,6 @@ service servicemanager /system/bin/servicemanager
     onrestart restart surfaceflinger
     onrestart restart drm
 
-service vold /system/bin/vold \
-        --blkid_context=u:r:blkid:s0 --blkid_untrusted_context=u:r:blkid_untrusted:s0 \
-        --fsck_context=u:r:fsck:s0 --fsck_untrusted_context=u:r:fsck_untrusted:s0
-    class core
-    socket vold stream 0660 root mount
-    socket cryptd stream 0660 root mount
-    ioprio be 2
-
-service netd /system/bin/netd
-    class main
-    socket netd stream 0660 root system
-    socket dnsproxyd stream 0660 root inet
-    socket mdns stream 0660 root system
-    socket fwmarkd stream 0660 root inet
-
 service debuggerd /system/bin/debuggerd
     class main
 
@@ -608,38 +618,16 @@ service surfaceflinger /system/bin/surfaceflinger
     user system
     group graphics drmrpc
     onrestart restart zygote
-
 service drm /system/bin/drmserver
     class main
     user drm
     group drm system inet drmrpc
 
-service media /system/bin/mediaserver
+service media /system/bin/camera_service
     class main
     user media
     group audio camera inet net_bt net_bt_admin net_bw_acct drmrpc mediadrm
     ioprio rt 4
-
-# One shot invocation to deal with encrypted volume.
-service defaultcrypto /system/bin/vdc --wait cryptfs mountdefaultencrypted
-    disabled
-    oneshot
-    # vold will set vold.decrypt to trigger_restart_framework (default
-    # encryption) or trigger_restart_min_framework (other encryption)
-
-# One shot invocation to encrypt unencrypted volumes
-service encrypt /system/bin/vdc --wait cryptfs enablecrypto inplace default
-    disabled
-    oneshot
-    # vold will set vold.decrypt to trigger_restart_framework (default
-    # encryption)
-
-service bootanim /system/bin/bootanimation
-    class core
-    user graphics
-    group graphics audio
-    disabled
-    oneshot
 
 service gatekeeperd /system/bin/gatekeeperd /data/misc/gatekeeper
     class late_start
@@ -669,11 +657,6 @@ service mtpd /system/bin/mtpd
     disabled
     oneshot
 
-service keystore /system/bin/keystore /data/misc/keystore
-    class main
-    user keystore
-    group keystore drmrpc
-
 service dumpstate /system/bin/dumpstate -s
     class main
     socket dumpstate stream 0660 shell log
@@ -688,15 +671,13 @@ service mdnsd /system/bin/mdnsd
     disabled
     oneshot
 
-service uncrypt /system/bin/uncrypt
-    class main
-    disabled
-    oneshot
+service sensorservice /system/bin/sensorservice
+    class late_start
+    user root
+    group root
 
-service pre-recovery /system/bin/uncrypt --reboot
-    class main
-    disabled
-    oneshot
+service ubuntuappmanager /system/bin/ubuntuappmanager
+     class main
 
 service perfprofd /system/xbin/perfprofd
     class late_start
