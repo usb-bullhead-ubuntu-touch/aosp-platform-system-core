@@ -79,6 +79,7 @@ void property_init() {
     property_area_initialized = true;
 
     if (__system_property_area_init()) {
+        ERROR("Failed to init system property area.");
         return;
     }
 
