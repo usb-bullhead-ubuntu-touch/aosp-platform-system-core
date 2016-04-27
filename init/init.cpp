@@ -764,6 +764,17 @@ static int console_init_action(int nargs, char **args)
     return 0;
 }
 
+static int property_service_init_action(int nargs, char **args)
+{
+    /* read any property files on system or data and
+     * fire up the property service.  This must happen
+     * after the ro.foo properties are set above so
+     * that /data/local.prop cannot interfere with them.
+     */
+    start_property_service();
+    return 0;
+}
+
 static void import_kernel_nv(char *name, bool for_emulator)
 {
     char *value = strchr(name, '=');
@@ -1079,11 +1090,11 @@ int main(int argc, char** argv) {
     signal_handler_init();
 
     property_load_boot_defaults();
-    start_property_service();
 
     init_parse_config_file("/init.rc");
 
     action_for_each_trigger("early-init", action_add_queue_tail);
+    queue_builtin_action(property_service_init_action, "property_service_init");
 
     // Queue an action that waits for coldboot done so we know ueventd has set up all of /dev...
     queue_builtin_action(wait_for_coldboot_done_action, "wait_for_coldboot_done");
