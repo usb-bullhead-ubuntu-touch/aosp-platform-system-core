@@ -5,11 +5,12 @@ LOCAL_PATH:= $(call my-dir)
 # --
 
 ifneq (,$(filter userdebug eng,$(TARGET_BUILD_VARIANT)))
-init_options += -DALLOW_LOCAL_PROP_OVERRIDE=1 -DALLOW_DISABLE_SELINUX=1
+init_options += -DALLOW_LOCAL_PROP_OVERRIDE=1
 else
-init_options += -DALLOW_LOCAL_PROP_OVERRIDE=0 -DALLOW_DISABLE_SELINUX=0
+init_options += -DALLOW_LOCAL_PROP_OVERRIDE=0
 endif
 
+init_options += -DALLOW_DISABLE_SELINUX=1
 init_options += -DLOG_UEVENTS=0
 
 init_cflags += \
