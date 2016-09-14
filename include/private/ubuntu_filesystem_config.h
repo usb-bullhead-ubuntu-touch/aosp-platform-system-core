@@ -358,13 +358,27 @@ static inline void ubuntu_set_fs_content(const char *fs_content) {
             strncpy(number, ++parsed, space - parsed);
             group = atoi(number);
 
-            // parse file/dir name
+            // parse file/dir name, strip /system from ster if present
             char* fileName = strstr(parsed, " system/");
             if (fileName == NULL){
-                printf("Failed to parse line: %s", line);
-                continue;
+                // path does not start with system/, try to find start of the file name
+                // first find ':' then first white space followed by filename
+                fileName = strstr(parsed, ":");
+                if (fileName == NULL) {
+                  printf("Failed to parse line: %s", line);
+                  continue;
+                }
+                // find first white space
+                while ( !isspace(*++fileName) && fileName );
+                // find first non white space
+                while ( isspace(*++fileName) && fileName );
+                if (fileName == NULL) {
+                  printf("Failed to parse line: %s", line);
+                  continue;
+                }
+            } else {
+                fileName+=8;
             }
-            fileName+=8;
             // if file is link, remove "->" part
             if (line[0] == 'l') {
                 parsed =  strstr(fileName, " ->");
